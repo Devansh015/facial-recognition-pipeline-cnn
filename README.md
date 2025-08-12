@@ -1,9 +1,7 @@
 ---
 
-## 📌 Overview
+##Overview
 
-This project demonstrates how to implement, train, and evaluate a Convolutional Neural Network (CNN) using **TensorFlow**, with the option to accelerate training on GPUs.  
-The tutorial uses the **MNIST** handwritten digit dataset and walks through:
 - Building the CNN architecture (convolution, pooling, fully connected layers)
 - Training on CPU vs GPU
 - Using AWS GPU instances for faster performance
@@ -14,7 +12,7 @@ The tutorial uses the **MNIST** handwritten digit dataset and walks through:
 ## Tech Stack
 
 - **Programming Language**: Python (2.7 or 3.5 in the original tutorial)
-- **Framework**: TensorFlow
+- **Framework**: TensorFlow 2x
 - **Visualization**: TensorBoard
 - **Deployment Environment**: Local machine or AWS GPU instances (e.g., `g2.2xlarge`)
 - **Dataset**: MNIST handwritten digits
@@ -43,3 +41,5 @@ The tutorial uses the **MNIST** handwritten digit dataset and walks through:
 4. **Pooling Layers** – Downsample feature maps (max pooling).
 5. **Fully Connected Layer** – Flattened output to dense units.
 6. **Output Layer** – 10 neurons (one per digit class), softmax activation.
+
+## Installation
