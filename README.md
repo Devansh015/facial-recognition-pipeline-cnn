@@ -1,6 +1,6 @@
 ---
 
-##Overview
+## Overview
 
 - Building the CNN architecture (convolution, pooling, fully connected layers)
 - Training on CPU vs GPU
@@ -28,7 +28,7 @@
 - Training on CPU or GPU
 - AWS GPU instance setup instructions
 - TensorBoard integration for training visualization
-- High accuracy (~98%) on MNIST
+- High accuracy (~98%) on MNIST over 10,000 iterations
 
 ---
 
@@ -43,3 +43,15 @@
 6. **Output Layer** – 10 neurons (one per digit class), softmax activation.
 
 ## Installation
+```bash
+pip install tensorflow 
+pip install matplotlib numpy
+```
+```bash
+3️⃣ Download the MNIST Dataset
+https://www.kaggle.com/datasets/oddrationale/mnist-in-csv # Both train and test available from the same page
+```
+```bash
+4️⃣ Run Training (CPU)
+python3 train.py
+```
