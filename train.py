@@ -1,62 +1,46 @@
+import argparse
 import tensorflow as tf
+import numpy as np
 
-import mnist_conv2d_medium_tutorial.mnist as mnist
-from mnist_conv2d_medium_tutorial.model import Model
+import mnist
+from model import Model
 
-FLAGS = tf.app.flags.FLAGS
 NUM_LABELS = 10
 
 
-def train():
-    model = Model()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--batch_size', type=int, default=128)
+    parser.add_argument('--num_iter', type=int, default=10000)
+    parser.add_argument('--checkpoint_file_path', type=str, default='checkpoints/model.ckpt-10000')
+    parser.add_argument('--train_data', type=str, default='data/mnist_train.csv')
+    parser.add_argument('--summary_dir', type=str, default='graphs')
+    args = parser.parse_args()
 
-    with tf.Graph().as_default():
-        images, val_images, labels, val_labels = mnist.load_train_data(FLAGS.train_data)
+    x_train, x_val, y_train, y_val = mnist.load_train_data(args.train_data)
 
-        x = tf.placeholder(shape=[None, mnist.IMAGE_SIZE, mnist.IMAGE_SIZE, 1], dtype=tf.float32, name='x')
-        y = tf.placeholder(shape=[None, NUM_LABELS], dtype=tf.float32, name='y')
-        keep_prob = tf.placeholder(tf.float32, name='dropout_prob')
-        global_step = tf.contrib.framework.get_or_create_global_step()
+    model = Model(input_shape=(mnist.IMAGE_SIZE, mnist.IMAGE_SIZE, 1), num_labels=NUM_LABELS)
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+                  loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
+                  metrics=['accuracy'])
 
-        logits = model.inference(x, keep_prob=keep_prob)
-        loss = model.loss(logits=logits, labels=y)
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=args.summary_dir)
+    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        filepath=args.checkpoint_file_path,
+        save_weights_only=True,
+        save_best_only=True,
+        monitor='val_accuracy',
+        mode='max',
+        verbose=1)
 
-        accuracy = model.accuracy(logits, y)
-        summary_op = tf.summary.merge_all()
-        train_op = model.train(loss, global_step=global_step)
-
-        init = tf.global_variables_initializer()
-        saver = tf.train.Saver()
-
-        with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
-            writer = tf.summary.FileWriter(FLAGS.summary_dir, sess.graph)
-            sess.run(init)
-            for i in range(FLAGS.num_iter):
-                offset = (i * FLAGS.batch_size) % (len(images) - FLAGS.batch_size)
-                batch_x, batch_y = images[offset:(offset + FLAGS.batch_size), :], labels[
-                                                                                  offset:(offset + FLAGS.batch_size), :]
-
-                _, cur_loss, summary = sess.run([train_op, loss, summary_op],
-                                                feed_dict={x: batch_x, y: batch_y, keep_prob: 0.5})
-                writer.add_summary(summary, i)
-                print(i, cur_loss)
-                if i % 1000 == 0:
-                    validation_accuracy = accuracy.eval(feed_dict={x: val_images, y: val_labels, keep_prob: 1.0})
-                    print('Iter {} Accuracy: {}'.format(i, validation_accuracy))
-
-                if i == FLAGS.num_iter - 1:
-                    saver.save(sess, FLAGS.checkpoint_file_path, global_step)
-
-
-def main(argv=None):
-    train()
+    model.fit(
+        x_train, y_train,
+        batch_size=args.batch_size,
+        epochs=args.num_iter // (len(x_train) // args.batch_size),
+        validation_data=(x_val, y_val),
+        callbacks=[tensorboard_callback, checkpoint_callback]
+    )
 
 
 if __name__ == '__main__':
-    tf.app.flags.DEFINE_integer('batch_size', 128, 'size of training batches')
-    tf.app.flags.DEFINE_integer('num_iter', 10000, 'number of training iterations')
-    tf.app.flags.DEFINE_string('checkpoint_file_path', 'checkpoints/model.ckpt-10000', 'path to checkpoint file')
-    tf.app.flags.DEFINE_string('train_data', 'data/mnist_train.csv', 'path to train and test data')
-    tf.app.flags.DEFINE_string('summary_dir', 'graphs', 'path to directory for storing summaries')
-
-    tf.app.run()
+    main()
