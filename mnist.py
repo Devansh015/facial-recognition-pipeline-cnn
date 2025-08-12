@@ -10,18 +10,15 @@ def load_train_data(data_path, validation_size=500):
     """
     # Data format: 1 byte label, 28 * 28 input
     train_data = np.genfromtxt(data_path, delimiter=',', dtype=np.float32)
-    x_train = train_data[:, 1:]
+    x_train = train_data[:, 1:] / 255.0  # Normalize to [0, 1]
 
     # Get label and one-hot encode
     y_train = train_data[:, 0]
     y_train = (np.arange(10) == y_train[:, None]).astype(np.float32)
 
     # get a validation set and remove it from the train set
-    x_train, x_val, y_train, y_val = x_train[0:(len(x_train) - validation_size), :], x_train[(
-        len(x_train) - validation_size):len(x_train), :], \
-                                     y_train[0:(len(y_train) - validation_size), :], y_train[(
-        len(y_train) - validation_size):len(y_train), :]
-
+    x_train, x_val, y_train, y_val = x_train[0:(len(x_train) - validation_size), :], x_train[(len(x_train) - validation_size):len(x_train), :], \
+                                     y_train[0:(len(y_train) - validation_size), :], y_train[(len(y_train) - validation_size):len(y_train), :]
     # reformat the data so it's not flat
     x_train = x_train.reshape(len(x_train), IMAGE_SIZE, IMAGE_SIZE, 1)
     x_val = x_val.reshape(len(x_val), IMAGE_SIZE, IMAGE_SIZE, 1)
@@ -35,7 +32,7 @@ def load_test_data(data_path):
     :return: 3D Tensor input of train and validation set with 2D Tensor of one hot encoded image labels
     """
     test_data = np.genfromtxt(data_path, delimiter=',', dtype=np.float32)
-    x_test = test_data[:, 1:]
+    x_test = test_data[:, 1:] / 255.0  # Normalize to [0, 1]
 
     y_test = np.array(test_data[:, 0])
     y_test = (np.arange(10) == y_test[:, None]).astype(np.float32)
