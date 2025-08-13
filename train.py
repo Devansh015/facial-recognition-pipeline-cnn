@@ -1,6 +1,8 @@
 import argparse
 import tensorflow as tf
 import numpy as np
+import os
+from pathlib import Path
 
 import mnist
 from model import Model
@@ -16,6 +18,19 @@ def main():
     parser.add_argument('--train_data', type=str, default='data/mnist_train.csv')
     parser.add_argument('--summary_dir', type=str, default='graphs')
     args = parser.parse_args()
+
+    # Resolve paths relative to this script directory
+    base_dir = Path(__file__).resolve().parent
+    if not os.path.isabs(args.train_data):
+        args.train_data = str(base_dir / args.train_data)
+    if not os.path.isabs(args.summary_dir):
+        args.summary_dir = str(base_dir / args.summary_dir)
+    if not os.path.isabs(args.checkpoint_file_path):
+        args.checkpoint_file_path = str(base_dir / args.checkpoint_file_path)
+
+    # Ensure output directories exist
+    os.makedirs(args.summary_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(args.checkpoint_file_path), exist_ok=True)
 
     x_train, x_val, y_train, y_val = mnist.load_train_data(args.train_data)
 
@@ -38,10 +53,14 @@ def main():
         mode='max',
         verbose=1)
 
+    # Compute steps per epoch and guard against zero
+    steps_per_epoch = max(1, len(x_train) // args.batch_size)
+    epochs = max(1, args.num_iter // steps_per_epoch)
+
     model.fit(
         x_train, y_train,
         batch_size=args.batch_size,
-        epochs=args.num_iter // (len(x_train) // args.batch_size),
+        epochs=epochs,
         validation_data=(x_val, y_val),
         callbacks=[tensorboard_callback, checkpoint_callback]
     )

@@ -1,0 +1,15 @@
+tensorflow==2.19.0
+numpy>=1.26
+pillow>=10.0
+scikit-learn>=1.4
+matplotlib>=3.8
+pandas>=2.2
+tensorboard>=2.19.0
+tqdm>=4.66
+opencv-python-headless>=4.9
+mtcnn>=0.1.1
+
+dlib==19.24.4
+face-recognition-models>=0.3.0
+# optional helper for alignment (pure python)
+face-alignment==1.4.1

@@ -1,0 +1,15 @@
+# Ignore large/local artifacts
+__pycache__/
+.git/
+.venv/
+*.pyc
+*.pyo
+*.pyd
+*.zip
+*.tgz
+*.tar.gz
+checkpoints/
+graphs/
+data/
+# Models and datasets
+!data/.gitkeep

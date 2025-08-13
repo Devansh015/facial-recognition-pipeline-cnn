@@ -8,8 +8,12 @@ def load_train_data(data_path, validation_size=500):
     Load mnist data. Each row in csv is formatted (label, input)
     :return: 3D Tensor input of train and validation set with 2D Tensor of one hot encoded image labels
     """
-    # Data format: 1 byte label, 28 * 28 input
-    train_data = np.genfromtxt(data_path, delimiter=',', dtype=np.float32)
+    # Data format in Kaggle CSVs has a header row; skip it and filter any bad rows.
+    train_data = np.genfromtxt(data_path, delimiter=',', dtype=np.float32, skip_header=1)
+    # Drop any rows that contain NaNs/Infs
+    mask = ~(np.isnan(train_data).any(axis=1) | np.isinf(train_data).any(axis=1))
+    train_data = train_data[mask]
+
     x_train = train_data[:, 1:] / 255.0  # Normalize to [0, 1]
 
     # Get label and one-hot encode
@@ -31,7 +35,11 @@ def load_test_data(data_path):
     Load mnist test data
     :return: 3D Tensor input of train and validation set with 2D Tensor of one hot encoded image labels
     """
-    test_data = np.genfromtxt(data_path, delimiter=',', dtype=np.float32)
+    test_data = np.genfromtxt(data_path, delimiter=',', dtype=np.float32, skip_header=1)
+    # Drop any rows that contain NaNs/Infs
+    mask = ~(np.isnan(test_data).any(axis=1) | np.isinf(test_data).any(axis=1))
+    test_data = test_data[mask]
+
     x_test = test_data[:, 1:] / 255.0  # Normalize to [0, 1]
 
     y_test = np.array(test_data[:, 0])
